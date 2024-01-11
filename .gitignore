@@ -1,0 +1,16 @@
+*.spec
+*/build
+*/*/build
+*/dist
+oaideployment/tmplogs
+kube_config_cluster.yml
+cluster.*
+clusterdep/
+oaideployment/deplogs/wave-*
+oaideployment/deplogs/nowave-*
+oaideployment/deplogs/alltables/
+oaimods/openair-spgwu-tiny/
+*.pdf
+*.svg
+*.png
+oaideployment/deplogs/*.csv

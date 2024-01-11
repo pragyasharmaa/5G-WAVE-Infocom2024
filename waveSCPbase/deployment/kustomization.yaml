@@ -1,0 +1,7 @@
+resources:
+ - 01_multus.yaml
+ #- 02_waveps.yaml
+ #- 03_waved.yaml 
+ - 04_deployment.yaml
+
+namespace: oai

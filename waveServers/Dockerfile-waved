@@ -1,0 +1,26 @@
+FROM ubuntu:22.04
+
+RUN apt-get update && \
+	apt-get upgrade --yes && \
+	apt-get install --yes \
+       build-essential \
+       psmisc \
+       git \
+       xxd \
+       unzip \
+       curl \
+       vim \
+       net-tools \
+       iputils-ping \
+       nmon \
+       htop
+
+ADD https://github.com/andymangibbs/wave_dependencies/raw/master/wave_dep.tar.gz /root
+RUN mkdir -p /root/wave && tar -zxvf /root/wave_dep.tar.gz -C /root/wave
+RUN mv /root/wave/wave_dep /etc/wave
+RUN sed -ri 's|^listenIp = .*|listenIp = "10.100.32.10:777"|' /etc/wave/wave.toml
+RUN sed -ri 's|^httpListenIp = .*|httpListenIp = "10.100.32.10:778"|' /etc/wave/wave.toml
+RUN sed -ri 's|url = .*|url = "http://10.100.33.10:7000/v1"|' /etc/wave/wave.toml
+
+ENTRYPOINT ["/etc/wave/waved"]
+CMD ["sh", "-c", "tail -f /dev/null"]

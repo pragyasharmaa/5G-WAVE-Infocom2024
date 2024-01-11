@@ -1,0 +1,23 @@
+FROM ubuntu:focal
+MAINTAINER pragyasharma
+
+RUN apt-get update
+RUN DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && \
+    DEBIAN_FRONTEND=noninteractive apt-get install --yes \
+       build-essential \
+       psmisc \
+       git \
+       curl \
+       vim \
+       net-tools \
+       iputils-ping \
+       nmon \
+       htop
+
+WORKDIR /etc/wave
+ADD https://drive.google.com/uc?export=download&id=1G44l5iBTRuJMdSnNjW9VMnsgMXccVDwR /etc/wave
+RUN mv uc WaveStorage
+RUN chmod +x WaveStorage
+
+ENTRYPOINT ["/etc/wave/WaveStorage"]
+

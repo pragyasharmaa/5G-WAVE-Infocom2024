@@ -1,0 +1,119 @@
+#apiVersion: v1
+#kind: PersistentVolume
+#metadata:
+  #name: wave-scp-pv
+  #labels:
+    #name: wave-scp-pv # important to avoid the volume not found error
+#spec:
+  #capacity:
+    #storage: 10Gi
+  #volumeMode: Filesystem
+  #accessModes:
+    #- ReadWriteOnce
+  #persistentVolumeReclaimPolicy: Retain
+  #storageClassName: wave-scp-class
+  #mountOptions:
+    #- hard
+    #- nfsvers=4.1
+  #nfs:
+    ##server: "38.68.237.37"
+    #server: "172.16.1.179"
+    #path: "/dockerdata-nfs/WAVE-proofs/"
+
+#---
+
+#apiVersion: v1
+#kind: PersistentVolumeClaim
+#metadata: 
+  #name: wave-scp-pvc
+#spec: 
+  #accessModes: 
+    #- ReadWriteOnce
+  #resources: 
+    #requests: 
+      #storage: 10Gi
+  #storageClassName: wave-scp-class
+
+#---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wave-scp
+  labels:
+    app: wave-scp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: wave-scp
+  #strategy:
+    #type: Recreate
+  template:
+    metadata:
+      labels:
+        app: wave-scp
+      annotations:
+        k8s.v1.cni.cncf.io/networks: wave-ext-net1
+    spec:
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+      #volumes:
+      #- name: wave-scp-storage
+        #persistentVolumeClaim:
+          #claimName: wave-scp-pvc
+      containers:
+      - name: wavescp
+        image: pragyasharmaa/wavescp:v4.5
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/bash", "-c"]
+        #args: ["/root/waveSCP/createEnt.sh; /root/waveSCP/build/wavescp"]
+        args: ["/root/waveSCP/createEnt.sh; tail -f /dev/null"]
+        env:
+          - name: DAEMON_IP
+            value: "10.100.32.10"
+        securityContext:
+          privileged: true
+        #volumeMounts:
+        #- mountPath: "/root/waveSCP/build/proofs"
+          #name: wave-scp-storage
+      - name: rpscp
+        image: pragyasharmaa/redirectproxyscp:v1.0
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/bash", "-c"]
+        #args: ["/root/rpSCP/dist/RedirectionProxy"]
+        args: ["./RedirectionProxy"]
+        securityContext:
+          privileged: true
+      initContainers:
+      - command:
+        - iptables
+        args:
+        - -t
+        - nat
+        - -A
+        - PREROUTING
+        - -p
+        - tcp
+        - --dport
+        - "80"
+        - -j
+        - REDIRECT
+        - --to-ports
+        - "10096"
+        image: pragyasharmaa/initscp:v1.0 
+        imagePullPolicy: IfNotPresent 
+        name: init-wavescp
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+            - NET_RAW
+          privileged: true
+          runAsNonRoot: false
+          runAsUser: 0
+          runAsGroup: 0
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30

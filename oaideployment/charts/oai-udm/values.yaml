@@ -1,0 +1,123 @@
+# Default values for oai-udm.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+namespace: "oai"
+
+wscpimage:
+  registry: local
+  repository: pragyasharmaa/wavescp
+  version: releaseV1.4
+  pullPolicy: IfNotPresent
+
+rpscpimage:
+  registry: local
+  repository: pragyasharmaa/redirectproxyscp
+  version: wave-1
+  pullPolicy: IfNotPresent
+
+initscpimage:
+  registry: local
+  repository: pragyasharmaa/initscp
+  version: v2.0
+  pullPolicy: IfNotPresent
+
+nfimage:
+  registry: local
+  repository: pragyasharmaa/oai-udm
+  version: v1.2
+  pullPolicy: IfNotPresent
+
+tcpdumpimage:
+  registry: local
+  repository: corfr/tcpdump
+  version: latest
+  pullPolicy: IfNotPresent
+
+## good to use when pulling images from docker-hub mention 
+#imagePullSecrets: 
+#  - name: "personalkey"
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: "oai-udm-sa10"
+
+podSecurityContext:
+  runAsUser: 0
+  runAsGroup: 0
+
+securityContext:
+  privileged: false
+
+service:
+  type: ClusterIP
+  httpPort: 80
+  wavescpPort: 10095
+  rpscpPort: 10096
+
+start:
+  udm: true
+  initscp: true
+  wavescp: true
+  rpscp: true
+  tcpdump: false #start tcpdump collection to analyse but beware it will take a lot of space in the container/persistent volume
+
+multus:
+  nudmIPmain: "10.100.13.10"
+  nudmIPGw: "10.100.10.1"
+  nudmIPnetmask: "16"
+
+config:
+  tz: "Europe/Paris"
+  instance: "0"
+  pidDirectory: "/var/run"
+  udmName: "OAI_UDM"
+  sbiIfName: "net1"
+  sbiPort: "80"
+  udmVersionNb: "v1"
+  useFqdnDns: "no"
+  udrIpAddress: "10.100.12.10"
+  udrPort: "80"
+  udrVersionNb: "v1"
+  udrFqdn: "oai-udr-svc"
+  f1ip: "10.100.30.11"
+  f2345ip: "10.100.30.10"
+  gautnip: "10.100.30.12"
+  kausfip: "10.100.30.15"
+  annexip: "10.100.30.13"
+  waverip: "10.100.14.10" # IP of remote wave scp i.e. IP address of remote VNF
+  wavescpPort: "10095"
+  wavelip: "127.0.0.1"
+  rpscpPort: "10096"
+  rpscpip: "127.0.0.1"
+  wavedip: "10.100.32.10"
+
+persistence:
+  sharedvolume: false
+  volumeName: managed-nfs-storage
+  size: 1Gi
+
+resources:
+  define: false
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+   cpu: 100m
+   memory: 256Mi
+
+terminationGracePeriodSeconds: 30
+
+readinessProbe: false
+livenessProbe: false
+
+nodeSelector: {}
+
+nodeName:

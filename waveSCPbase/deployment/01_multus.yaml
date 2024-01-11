@@ -1,0 +1,36 @@
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition 
+metadata:
+  name: wave-ext-net1
+spec:
+  config: '{ 
+      "cniVersion": "0.3.0",
+      "type": "macvlan",
+      "master": "ens3",
+      "mode": "bridge",
+      "ipam": {
+        "type": "static",
+        "addresses": [
+            {
+              "address": "20.15.10.10/16",
+              "gateway": "20.15.10.1"
+            }
+        ]
+      }
+    }'
+  #config: '{ 
+      #"cniVersion": "0.3.0",
+      #"type": "macvlan",
+      #"master": "enp0s3",
+      #"mode": "bridge",
+      #"ipam": {
+        #"type": "static",
+        #"addresses": [
+            #{
+              #"address": "20.15.10.10/16",
+              #"gateway": "20.15.10.1"
+            #}
+        #]
+      #}
+    #}'
